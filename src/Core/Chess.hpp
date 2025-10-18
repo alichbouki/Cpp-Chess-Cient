@@ -1,7 +1,7 @@
 #ifndef PIECE_HPP
 #define PIECE_HPP
 
-// This array will hold move information: pieceId, toX, toY, specialMoveFlag
+// A move is represented as an array of four integers: {fromX, fromY, toX, toY}
 typedef int Move[4];
 
 namespace PieceTypes {
