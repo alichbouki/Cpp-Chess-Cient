@@ -3,10 +3,10 @@
 
 #include "src/Core/Chess.hpp"
 
-void initializeGUI(Piece **Board);
+void initializeGUI(ChessBoard *Board);
 
 void getPlayerMove(int *move);
 
-void updateGUI(Piece **Board, int *move);
+void updateGUI(ChessBoard *Board, int *move);
 
 #endif

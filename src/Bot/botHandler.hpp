@@ -3,6 +3,6 @@
 
 #include "src/Core/Chess.hpp"
 
-void getBotMove(Piece **Board, int *move);
+void getBotMove(ChessBoard *Board, int *move);
 
 #endif

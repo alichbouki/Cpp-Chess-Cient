@@ -54,6 +54,7 @@ class ChessBoard
         Piece*** _board; // 2D array of Piece pointers
 
     public:
+        ChessBoard();
         Piece* getPieceAt(int x, int y) const;
         void setPieceAt(int x, int y, Piece* piece);
         void movePiece(int fromX, int fromY, int toX, int toY);

@@ -3,7 +3,7 @@
 #include "src/Bot/botHandler.hpp"
 
 int main(){
-    Piece **Board;
+    ChessBoard *Board = new ChessBoard();
 
     initializeGUI(Board);
 

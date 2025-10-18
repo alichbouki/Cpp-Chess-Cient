@@ -39,6 +39,17 @@ int Piece::getId() const
     return _id;
 }
 
+ChessBoard::ChessBoard()
+{
+    _board = new Piece**[8];
+    for (int i = 0; i < 8; i++) {
+        _board[i] = new Piece*[8];
+        for (int j = 0; j < 8; j++) {
+            _board[i][j] = nullptr;
+        }
+    }
+}
+
 Piece* ChessBoard::getPieceAt(int x, int y) const
 {
     return _board[x][y];
@@ -60,6 +71,6 @@ void ChessBoard::movePiece(int fromX, int fromY, int toX, int toY)
 
     setPieceAt(toX, toY, piece);
     setPieceAt(fromX, fromY, nullptr);
-    
+
     piece->move(toX, toY);
 }
