@@ -10,12 +10,6 @@ Piece::Piece(char type, char state)
     _pieceCounter++;
 }
 
-void Piece::move(int toX, int toY)
-{
-    _x = toX;
-    _y = toY;
-}
-
 void Piece::capture()
 {
     _state = PieceState::CAPTURED;
@@ -36,19 +30,7 @@ int Piece::getId() const
     return _id;
 }
 
-string Piece::getPosition(bool enPassant) const
-{
-    if (enPassant) {
-        if (_type == PieceType::BLACK_PAWN) {
-            return string(1, 'a' + _x) + to_string(_y - 1);
-        } else if (_type == PieceType::BLACK_PAWN) {
-            return string(1, 'a' + _x) + to_string(_y + 1);
-        }
-    }
-    return string(1, 'a' + _x) + to_string(_y);
-}
-
-ChessBoard::ChessBoard(bool startingPosition) {
+ChessBoard::ChessBoard(bool startingPosition){
     _board = new Piece**[8];
     for (int i = 0; i < 8; i++) {
         _board[i] = new Piece*[8];
@@ -56,6 +38,8 @@ ChessBoard::ChessBoard(bool startingPosition) {
             _board[i][j] = nullptr;
         }
     }
+
+    eval = 0.0f;
 
     resetBoard(startingPosition);
 }
@@ -94,23 +78,27 @@ void ChessBoard::setPieceAt(int x, int y, Piece* piece)
 void ChessBoard::movePiece(int fromX, int fromY, int toX, int toY)
 {
     Piece* piece = getPieceAt(fromX, fromY);
-
+    
     if (getPieceAt(toX, toY) != nullptr) {
         
         getPieceAt(toX, toY)->capture();
     }
-
+    
     setPieceAt(toX, toY, piece);
     setPieceAt(fromX, fromY, nullptr);
-
-    piece->move(toX, toY);
+    if (turn == WHITE_TURN) {
+        turn = BLACK_TURN;
+    } else {
+        turn = WHITE_TURN;
+        moveCount++;
+    }
 }
 
 string ChessBoard::boardToFEN() {
     string fen;
     string piecesPlacement = "";
 
-    for (int i = 0; i < 8; i++) {
+    for (int i = 7; i >= 0; i--) {
         int emptyCount = 0;
         for (int j = 0; j < 8; j++) {
             Piece* piece = this->getPieceAt(j, i);
@@ -127,8 +115,21 @@ string ChessBoard::boardToFEN() {
         if (emptyCount > 0) {
             piecesPlacement += to_string(emptyCount);
         }
-        if (i < 7) {
+        if (i > 0) {
             piecesPlacement += '/';
+        }
+    }
+
+    string enPassantStr = "";
+
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            Piece* piece = this->getPieceAt(i, j);
+            if (piece != nullptr && (piece->getType() == PieceType::BLACK_PAWN || piece->getType() == PieceType::WHITE_PAWN)) {
+                if (enPassantTarget != nullptr && enPassantTarget->getId() == piece->getId()) {
+                    enPassantStr = string(1, i + 'a') + to_string(j + 1);
+                }
+            }
         }
     }
 
@@ -142,7 +143,7 @@ string ChessBoard::boardToFEN() {
         (bcq ? "q" : "") +
         (bcq || bck || wcq || wck ? "" : "-") +
         " " +
-        (enPassantTarget != nullptr ? enPassantTarget->getPosition(true) : "-") +
+        (enPassantTarget != nullptr ? enPassantStr : "-") +
         " 0 " +
         to_string(moveCount);
 
@@ -156,13 +157,13 @@ void ChessBoard::FENToBoard(const string& fen) {
     string piecesPlacement = fen.substr(pos, nextSpace - pos);
     
     // Parse piece placement
-    int rank = 0;
+    int rank = 7;
     int file = 0;
     for (size_t i = 0; i < piecesPlacement.length(); i++) {
         char c = piecesPlacement[i];
         
         if (c == '/') {
-            rank++;
+            rank--;
             file = 0;
         } else if (isdigit(c)) {
             // Empty squares
@@ -175,7 +176,6 @@ void ChessBoard::FENToBoard(const string& fen) {
             // Piece
             Piece* piece = new Piece(c);
             _board[file][rank] = piece;
-            piece->move(file, rank);
             file++;
         }
     }
@@ -224,12 +224,28 @@ void ChessBoard::FENToBoard(const string& fen) {
     }
 }
 
-void ChessBoard::_convIntToChar(int file, int rank, char &outFile, char &outRank) {
-    outFile = static_cast<char>(file + 'a');
-    outRank = static_cast<char>(rank + '1');
+void ChessBoard::_convIntToChar(int file, int rank, char *outFile, char *outRank) {
+    *outFile = static_cast<char>(file + 'a');
+    *outRank = static_cast<char>(rank + '1');
 }
 
-void ChessBoard::_convCharToInt(char file, char rank, int &outFile, int &outRank) {
-    outFile = static_cast<int>(file - 'a');
-    outRank = static_cast<int>(rank - '1');
+void ChessBoard::_convCharToInt(char file, char rank, int *outFile, int *outRank) {
+    *outFile = static_cast<int>(file - 'a');
+    *outRank = static_cast<int>(rank - '1');
+}
+
+void ChessBoard::printBoard() const {
+    for (int rank = 7; rank >= 0; rank--) {
+        cout << rank + 1 << " ";
+        for (int file = 0; file < 8; file++) {
+            Piece* piece = getPieceAt(file, rank);
+            if (piece != nullptr) {
+                cout << piece->getType() << " ";
+            } else {
+                cout << ". ";
+            }
+        }
+        cout << endl;
+    }
+    cout << "  a b c d e f g h" << endl;
 }

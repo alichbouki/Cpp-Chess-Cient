@@ -2,14 +2,13 @@
 #define PIECE_HPP
 
 #include <string>
+#include <vector>
+#include <iostream>
 
 using namespace std;
 
 #define WHITE_TURN 'w'
 #define BLACK_TURN 'b'
-
-// A move is represented as an array of four integers: {fromX, fromY, toX, toY}
-typedef char Move[4];
 
 /// @brief  Pieces types in chess
 namespace PieceType {
@@ -51,8 +50,6 @@ class Piece
         char _type;
         char _state;
         int _id;
-        int _y;
-        int _x;
         
     public:
 
@@ -63,20 +60,6 @@ class Piece
          * @param state: The piece state (e.g., '1' for normal, '2' for captured). Use PieceState for reference.
         */
         Piece(char type = PieceType::EMPTY, char state = PieceState::NORMAL);
-
-        /** 
-         * @brief Get the current position of the piece
-         * @param enPassant: Whether the position is for an en passant capture, default is false
-         * @return The position of the piece as a string (e.g., "e4")
-        */
-        string getPosition(bool enPassant = false) const;
-
-        /**
-         * @brief Move the piece to a new position
-         * @param toX The target x-coordinate (file) e.g., 0 for 'a', 1 for 'b', ..., 7 for 'h'
-         * @param toY The target y-coordinate (rank)
-        */
-        void move(int toX, int toY);
 
         /**
          * @brief Capture the piece
@@ -100,6 +83,20 @@ class Piece
         int getId() const;
 };
 
+class Move{
+    public:
+        int toX;
+        int toY;
+        int fromY = -1;
+        int fromX = -1;
+        char pieceType = ' ';
+        bool isCheck = false;
+        bool isMate = false;
+        bool isCapture = false;
+        bool isPromotion = false;
+        char promotionType = ' ';
+};
+
 class ChessBoard
 {
     private:
@@ -119,7 +116,12 @@ class ChessBoard
         bool bcq = true;
 
         /// @brief Move count
-        int moveCount = 1;
+        int moveCount = 0;
+
+        float eval;
+        bool isMate = false;
+
+        bool botColor = false; // false for black, true for white
 
         /// @brief En passant target piece or nullptr if none
         Piece* enPassantTarget = nullptr;
@@ -171,6 +173,11 @@ class ChessBoard
          * @param fen The FEN string to parse and set up the board
          */
         void FENToBoard(const string& fen);
+        
+        /**
+         * @brief Print the current board state to the console
+         */
+        void printBoard() const;
 
         /**
          * @brief  Convert file and rank from int to char representation
@@ -179,7 +186,7 @@ class ChessBoard
          * @param  outFile: Reference to store the converted file character ('a'-'h')
          * @param  outRank: Reference to store the converted rank character ('1'-
          */
-        static void _convIntToChar(int file, int rank, char &outFile, char &outRank);
+        static void _convIntToChar(int file, int rank, char *outFile, char *outRank);
 
         /**
          * @brief  Convert file and rank from char to int representation
@@ -188,8 +195,6 @@ class ChessBoard
          * @param  outFile: Reference to store the converted file integer (0-7)
          * @param  outRank: Reference to store the converted rank integer (0-7)
          */
-        static void _convCharToInt(char file, char rank, int &outFile, int &outRank);
+        static void _convCharToInt(char file, char rank, int *outFile, int *outRank);
 };
-
-
 #endif // PIECE_HPP

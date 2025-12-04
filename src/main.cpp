@@ -1,20 +1,15 @@
-#include <chess.hpp>
-#include <guiHandler.hpp>
 #include <botHandler.hpp>
+#include <chess.hpp>
 
-int main(){
-    ChessBoard Board(true);
-    // initializeGUI(&Board);
+using namespace std;
 
-    Move move;
-
-    while (true)
-    {
-        // getPlayerMove(move);
-        // updateGUI(&Board, move);
-
-        // getBotMove(&Board, move);
-        // updateGUI(&Board, move);
+int main() {
+    ChessBoard board(true); // Standard starting position, bot plays black
+    board.printBoard();
+    for (int i = 0; i < 3; i++) {
+        getBotMove(&board);
+        board.printBoard();
+        sleep(1); 
     }
     return 0;
 }
